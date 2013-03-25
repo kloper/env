@@ -1,0 +1,11 @@
+BoldAsFont=no
+Font=Consolas
+Transparency=medium
+CursorColour=0,128,64
+CursorType=block
+FontSmoothing=default
+RightClickAction=paste
+Columns=150
+Rows=50
+FontIsBold=no
+FontHeight=9
