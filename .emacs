@@ -1,5 +1,5 @@
 (setq load-path (append 
-		 '("~/emacs/lib")
+		 '("~/emacs")
 		 load-path))
 
 (setq Info-additional-directory-list 
