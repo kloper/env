@@ -247,16 +247,6 @@
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'reverse)
 
-;;;;;;;;;;;;;;;;;;;;;;
-;;; html
-;;;;;;;;;;;;;;;;;;;;;;
-(require 'html-helper-mode)
-(setq auto-mode-alist
-  (append '(
-	    ("\\.htm$" . html-helper-mode)
-	    ("\\.html$" . html-helper-mode)
-           ) auto-mode-alist ))
-
 ;;;;;;;;;;;;;;;;;;;;
 ;; VRML mode
 ;;;;;;;;;;;;;;;;;;;;
