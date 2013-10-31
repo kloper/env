@@ -2,10 +2,12 @@
 PS1="\h \w>"
 
 ################ History #########################
-HISTSIZE=100
-HISTFILE=~/.bashhist
-HISTFILESIZE=100
-command_oriented_history=1
+HISTSIZE=10000
+HISTFILE=~/.bashhist                                                                                                                                                   
+HISTFILESIZE=20000                                                                                                                                                              
+HISTCONTROL=ignoreboth                                                                                                                                                           
+shopt -s histappend                                                                                                                                                              
+shopt -s checkwinsize 
 
 ################ Environment #####################
 export PATH=$PATH:/usr/local/bin:/usr/X11R6/bin
