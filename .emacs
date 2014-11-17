@@ -27,7 +27,9 @@
 
 (add-to-list 'custom-theme-load-path "~/emacs/themes")
 
-(load-theme 'kloper t)
+(if (not window-system)
+    (load-theme 'kloper-nw t)
+    (load-theme 'kloper t))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; general settings
@@ -123,9 +125,13 @@
 (global-set-key [S-next] 'next-error)
 (global-set-key [S-prior] 'previous-error)
 (global-set-key [C-up] 'scroll-down)
+(global-set-key "\e[a" 'scroll-down)
 (global-set-key [C-down] 'scroll-up)
+(global-set-key "\e[b" 'scroll-up)
 (global-set-key [C-left] 'beginning-of-line)
+(global-set-key "\e[d" 'beginning-of-line)
 (global-set-key [C-right] 'end-of-line)
+(global-set-key "\e[c" 'end-of-line)
 (global-set-key [home] 'beginning-of-buffer)
 (global-set-key [end] 'end-of-buffer)
 (global-set-key [S-up] 'previous-line)
@@ -141,6 +147,7 @@
 ;;;;;;;;;;;;;;;;;;;;
 ;; fix shell on windows
 ;;;;;;;;;;;;;;;;;;;;
+(setq w32-get-true-file-attributes nil)
 
 (when (eq system-type 'windows-nt)
   (defun set-shell-cmdproxy()
@@ -313,7 +320,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("ac0df460b05de49aafa7a4595999cd926a250fcbc18b19a0d7923fe0b693aacd" "d347797c547ca95a11a2fa34ca1a825b5c4c80bfbb30e9b4fd34977f405fd746" "d24e10524bb50385f7631400950ba488fa45560afcadd21e6e03c2f5d0fad194" "fe6330ecf168de137bb5eddbf9faae1ec123787b5489c14fa5fa627de1d9f82b" "3dd173744ae0990dd72094caef06c0b9176b3d98f0ee5d822d6a7e487c88d548" "246a51f19b632c27d7071877ea99805d4f8131b0ff7acb8a607d4fd1c101e163" "f5e56ac232ff858afb08294fc3a519652ce8a165272e3c65165c42d6fe0262a0" default))))
+ '(custom-safe-themes (quote ("ac0df460b05de49aafa7a4595999cd926a250fcbc18b19a0d7923fe0b693aacd" "d347797c547ca95a11a2fa34ca1a825b5c4c80bfbb30e9b4fd34977f405fd746" "d24e10524bb50385f7631400950ba488fa45560afcadd21e6e03c2f5d0fad194" "fe6330ecf168de137bb5eddbf9faae1ec123787b5489c14fa5fa627de1d9f82b" "3dd173744ae0990dd72094caef06c0b9176b3d98f0ee5d822d6a7e487c88d548" "246a51f19b632c27d7071877ea99805d4f8131b0ff7acb8a607d4fd1c101e163" "f5e56ac232ff858afb08294fc3a519652ce8a165272e3c65165c42d6fe0262a0" default)))
+ '(directory-free-space-program nil))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
