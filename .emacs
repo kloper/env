@@ -228,8 +228,27 @@
           (function (lambda()
                       (local-set-key [tab] 'py-indent-line-outmost)
                       (local-set-key [C-tab] 'py-indent-line)
-                      (add-hook 'before-save-hook
-                                'delete-trailing-whitespace))))
+                      (add-hook 'write-contents-functions
+                                (lambda()
+                                  (save-excursion
+                                    (delete-trailing-whitespace)))))))
+
+;;;;;;;;;;;;;;;;;;;;
+;; flyspell
+;;;;;;;;;;;;;;;;;;;;
+
+(add-hook 'python-mode-hook
+          (function (lambda()
+                      (flyspell-prog-mode))))
+
+(add-hook 'c-mode-hook
+          (function (lambda()
+                      (flyspell-prog-mode))))
+
+(add-hook 'c++-mode-hook
+          (function (lambda()
+                      (flyspell-prog-mode))))
+
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; perl
@@ -249,39 +268,48 @@
 (require 'flycheck)
 (setq flycheck-checker-error-threshold nil)
 
-(flycheck-define-checker python-pylint-custom
-  "A Python syntax and style checker using Pylint.
-
-This syntax checker requires Pylint 1.0 or newer.
-
-See URL `http://www.pylint.org/'."
-  ;; -r n disables the scoring report
-  :command ("/w/riscure/rhea/tools/pylint.py" "-r" "n"
-            "--msg-template" "{path}:{line}:{column}:{C}:{msg_id}:{msg} ({symbol})"
-            (config-file "--rcfile" flycheck-pylintrc)
-            ;; Need `source-inplace' for relative imports (e.g. `from .foo
-            ;; import bar'), see https://github.com/flycheck/flycheck/issues/280
-            source-inplace)
-  :error-filter
-  (lambda (errors)
-    (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
-  :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":"
-          (or "E" "F") ":"
-          (id (one-or-more (not (any ":")))) ":"
-          (message) line-end)
-   (warning line-start (file-name) ":" line ":" column ":"
-            (or "W" "R") ":"
+(when (eq system-type 'cygwin)
+  (flycheck-define-checker python-pylint-custom
+    "A Python syntax and style checker using Pylint.
+     This syntax checker requires Pylint 1.0 or newer.
+     See URL `http://www.pylint.org/'."
+    ;; -r n disables the scoring report
+    :command ("/w/riscure/rhea/tools/pylint.py" "-r" "n"
+              "--msg-template"
+              "{path}:{line}:{column}:{C}:{msg_id}:{msg} ({symbol})"
+              (config-file "--rcfile" flycheck-pylintrc)
+              ;; Need `source-inplace' for relative imports (e.g. `from .foo
+              ;; import bar'), see
+              ;; https://github.com/flycheck/flycheck/issues/280
+              source-inplace)
+    :error-filter
+    (lambda (errors)
+      (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
+    :error-patterns
+    ((error line-start (file-name) ":" line ":" column ":"
+            (or "E" "F") ":"
             (id (one-or-more (not (any ":")))) ":"
             (message) line-end)
-   (info line-start (file-name) ":" line ":" column ":"
-         "C:" (id (one-or-more (not (any ":")))) ":"
-         (message) line-end))
-  :modes python-mode)
+     (warning line-start (file-name) ":" line ":" column ":"
+              (or "W" "R") ":"
+              (id (one-or-more (not (any ":")))) ":"
+              (message) line-end)
+     (info line-start (file-name) ":" line ":" column ":"
+           "C:" (id (one-or-more (not (any ":")))) ":"
+           (message) line-end))
+    :modes python-mode)
 
-(add-hook 'python-mode-hook (function (lambda()
-                              (flycheck-select-checker 'python-pylint-custom)
-                              (flycheck-mode))))
+  (add-hook 'python-mode-hook
+            (function (lambda()
+                        (flycheck-select-checker 'python-pylint-custom)
+                        (flycheck-mode)))))
+
+(unless (eq system-type 'cygwin)
+    (add-hook 'python-mode-hook
+            (function (lambda()
+                        (flycheck-select-checker 'python-pylint)
+                        (flycheck-mode)))))
+
 ;;;;;;;;;;;;;;;;;;;;
 ;; auto insert
 ;;;;;;;;;;;;;;;;;;;;
@@ -295,18 +323,18 @@ See URL `http://www.pylint.org/'."
 	 "../../../emacs-insert"
 	 "~/emacs/insert"))
 
-(setq auto-insert-alist (append 
-			 '(("\\.java$" . "Java") 
-			   ("\\.tcl$" . "Tcl") 
-			   ("\\.cpp$" . "C++") 
+(setq auto-insert-alist (append
+			 '(("\\.java$" . "Java")
+			   ("\\.tcl$" . "Tcl")
+			   ("\\.cpp$" . "C++")
 			   ("\\.p[lm]$" . "CPerl")
-			   ("\\.py$" . "Python")                           
+			   ("\\.py$" . "Python")
 			   ("[Cc]onstruct$" . "CPerl")
-			   ("[Cc]onscript$" . "CPerl")) 
+			   ("[Cc]onscript$" . "CPerl"))
 			 auto-insert-alist))
 
-(setq auto-insert-type-alist (append 
-			      '(("Java" . "java-insert.java") 
+(setq auto-insert-type-alist (append
+			      '(("Java" . "java-insert.java")
 				("Tcl" . "tcl-insert.tcl")
                                 ("Python" . "py-insert.py")
 				("CPerl" . "pl-insert.pl"))
