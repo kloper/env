@@ -228,6 +228,7 @@
           (function (lambda()
                       (local-set-key [tab] 'py-indent-line-outmost)
                       (local-set-key [C-tab] 'py-indent-line)
+                      (toggle-py-underscore-word-syntax-p nil)
                       (add-hook 'write-contents-functions
                                 (lambda()
                                   (save-excursion
@@ -274,7 +275,7 @@
      This syntax checker requires Pylint 1.0 or newer.
      See URL `http://www.pylint.org/'."
     ;; -r n disables the scoring report
-    :command ("/w/riscure/rhea/tools/pylint.py" "-r" "n"
+    :command ("~/emacs/pylint.py" "-r" "n"
               "--msg-template"
               "{path}:{line}:{column}:{C}:{msg_id}:{msg} ({symbol})"
               (config-file "--rcfile" flycheck-pylintrc)
