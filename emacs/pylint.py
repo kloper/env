@@ -58,17 +58,25 @@ if debug:
     with open(logname, "w+") as log:
         log.write(" ".join(sys.argv) + "\n")
 
-python_root = os.path.join("/cygdrive", "c", #pylint: disable=invalid-name
-                           "WinPython-3.4.3.1",
-                           "python-3.4.3.amd64")
+python3 = False
+
+if python3:
+    python_root = os.path.join("/cygdrive", "c", #pylint: disable=invalid-name
+                               "WinPython-3.4.3.1",
+                               "python-3.4.3.amd64")
+else:
+    python_root = os.path.join("/cygdrive", "c", #pylint: disable=invalid-name
+                               "WinPython-2.7.9.5-32",
+                               "python-2.7.9")
 
 #pylint: disable=invalid-name
 python_scripts_dir = os.path.join(python_root, "Scripts")
 
 file_to_check = to_win_path(sys.argv[-1])
 
-args = [os.path.join(python_scripts_dir, "pylint")] + sys.argv[1:-1] + \
-  [to_win_path(sys.argv[-1])]
+args = [os.path.join(python_root, "python"), "-m", "pylint"] + \
+  sys.argv[1:-1] + \
+  [file_to_check]
 
 if debug:
     with open(logname, "a+") as log:
@@ -114,4 +122,3 @@ exit(rc)
 #
 # pylint.py -- end of file
 #
-
