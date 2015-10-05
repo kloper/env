@@ -212,11 +212,12 @@
 
 (add-hook 'c-mode-hook (function (lambda() (c-set-style "kloper") 
 				   (setq ps-line-number t)
-                                   (column-marker-1 80))))
+                                   (column-marker-1 79))))
 (add-hook 'c++-mode-hook (function (lambda() (c-set-style "kloper")
 				     (setq ps-line-number t) 
-                                     (column-marker-1 80))))
-(add-hook 'python-mode-hook (function (lambda() (column-marker-1 80))))
+                                     (column-marker-1 79))))
+(add-hook 'python-mode-hook (function (lambda() (column-marker-1 79))))
+(add-hook 'tex-mode-hook (function (lambda() (column-marker-1 79))))
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; python
