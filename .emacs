@@ -133,6 +133,7 @@
 (global-set-key [S-right] 'forward-word)
 (global-set-key [S-left] 'backward-word)
 (global-set-key [S-tab] 'dabbrev-expand)
+(global-set-key [backtab] 'dabbrev-expand)
 (global-set-key [C-S-down-mouse-1] 'mouse-set-font)
 (global-set-key [C-down-mouse-1] 'mouse-buffer-menu)
 ;; (global-set-key [wheel-up] 'scroll-down)

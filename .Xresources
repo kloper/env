@@ -1,3 +1,4 @@
 XTerm*metaSendsEscape: true
 XTerm*geometry: 120x40
 XTerm*font: 9x15
+XTerm*selectToClipboard: true
