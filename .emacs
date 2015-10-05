@@ -22,12 +22,30 @@
              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 
 ;;;;;;;;;;;;;;;;;;;;;
+;; Terminal
+;;;;;;;;;;;;;;;;;;;;;
+
+(unless window-system
+  (require 'mouse)
+  (xterm-mouse-mode t)
+  (global-set-key [mouse-4] '(lambda ()
+                              (interactive)
+                              (scroll-down 1)))
+  (global-set-key [mouse-5] '(lambda ()
+                              (interactive)
+                              (scroll-up 1)))
+  (defun track-mouse (e))
+  (setq mouse-sel-mode t))
+
+;;;;;;;;;;;;;;;;;;;;;
 ;; color theme
 ;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'custom-theme-load-path "~/emacs/themes")
 
-(load-theme 'kloper t)
+(if (not  window-system)
+    (load-theme 'kloper-nw t)    
+    (load-theme 'kloper t))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; general settings
@@ -64,7 +82,7 @@
 (setq backup-by-copying 1) ;; this one avoids problems with cons hard links
 (setq version-control t)
 (setq kept-new-versions 5)
-(setq kept-old-versions 2)
+(setq kept-old-versions 5)
 (setq delete-old-versions t)
 
 ;; control buffer menu size
@@ -102,6 +120,7 @@
 		("\\.java$"  . jde-mode)
 		("\\.pl$"    . cperl-mode)
 		("\\.pm$"    . cperl-mode)
+		("\\.py$"    . python-mode)                
 		("[Cc]onstruct$" . cperl-mode)
 		("[Cc]onscript$" . cperl-mode)
 		("\\.[xX][Mm][lL]$" . nxml-mode)
@@ -123,9 +142,13 @@
 (global-set-key [S-next] 'next-error)
 (global-set-key [S-prior] 'previous-error)
 (global-set-key [C-up] 'scroll-down)
+(global-set-key "\e[a" 'scroll-down)
 (global-set-key [C-down] 'scroll-up)
+(global-set-key "\e[b" 'scroll-up)
 (global-set-key [C-left] 'beginning-of-line)
+(global-set-key "\e[d" 'beginning-of-line)
 (global-set-key [C-right] 'end-of-line)
+(global-set-key "\e[c" 'end-of-line)
 (global-set-key [home] 'beginning-of-buffer)
 (global-set-key [end] 'end-of-buffer)
 (global-set-key [S-up] 'previous-line)
@@ -142,6 +165,7 @@
 ;;;;;;;;;;;;;;;;;;;;
 ;; fix shell on windows
 ;;;;;;;;;;;;;;;;;;;;
+(setq w32-get-true-file-attributes nil)
 
 (when (eq system-type 'windows-nt)
   (defun set-shell-cmdproxy()
@@ -188,10 +212,44 @@
 
 (add-hook 'c-mode-hook (function (lambda() (c-set-style "kloper") 
 				   (setq ps-line-number t)
-                                   (column-marker-1 80))))
+                                   (column-marker-1 79))))
 (add-hook 'c++-mode-hook (function (lambda() (c-set-style "kloper")
 				     (setq ps-line-number t) 
-                                     (column-marker-1 80))))
+                                     (column-marker-1 79))))
+(add-hook 'python-mode-hook (function (lambda() (column-marker-1 79))))
+(add-hook 'tex-mode-hook (function (lambda() (column-marker-1 79))))
+
+;;;;;;;;;;;;;;;;;;;;
+;; python
+;;;;;;;;;;;;;;;;;;;;
+
+(require 'python-mode)
+(setq py-electric-colon-active t)
+(add-hook 'python-mode-hook
+          (function (lambda()
+                      (local-set-key [tab] 'py-indent-line-outmost)
+                      (local-set-key [C-tab] 'py-indent-line)
+                      (add-hook 'write-contents-functions
+                                (lambda()
+                                  (save-excursion
+                                    (delete-trailing-whitespace)))))))
+
+;;;;;;;;;;;;;;;;;;;;
+;; flyspell
+;;;;;;;;;;;;;;;;;;;;
+
+(add-hook 'python-mode-hook
+          (function (lambda()
+                      (flyspell-prog-mode))))
+
+(add-hook 'c-mode-hook
+          (function (lambda()
+                      (flyspell-prog-mode))))
+
+(add-hook 'c++-mode-hook
+          (function (lambda()
+                      (flyspell-prog-mode))))
+
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; perl
@@ -203,6 +261,55 @@
 (setq cperl-indent-level 4)
 (setq cperl-lineup-step 1)
 (setq cperl-indent-parens-as-block t)
+
+;;;;;;;;;;;;;;;;;;;;
+;; flycheck
+;;;;;;;;;;;;;;;;;;;;
+
+(require 'flycheck)
+(setq flycheck-checker-error-threshold nil)
+
+(when (eq system-type 'cygwin)
+  (flycheck-define-checker python-pylint-custom
+    "A Python syntax and style checker using Pylint.
+     This syntax checker requires Pylint 1.0 or newer.
+     See URL `http://www.pylint.org/'."
+    ;; -r n disables the scoring report
+    :command ("~/emacs/pylint.py" "-r" "n"
+              "--msg-template"
+              "{path}:{line}:{column}:{C}:{msg_id}:{msg} ({symbol})"
+              (config-file "--rcfile" flycheck-pylintrc)
+              ;; Need `source-inplace' for relative imports (e.g. `from .foo
+              ;; import bar'), see
+              ;; https://github.com/flycheck/flycheck/issues/280
+              source-inplace)
+    :error-filter
+    (lambda (errors)
+      (flycheck-sanitize-errors (flycheck-increment-error-columns errors)))
+    :error-patterns
+    ((error line-start (file-name) ":" line ":" column ":"
+            (or "E" "F") ":"
+            (id (one-or-more (not (any ":")))) ":"
+            (message) line-end)
+     (warning line-start (file-name) ":" line ":" column ":"
+              (or "W" "R") ":"
+              (id (one-or-more (not (any ":")))) ":"
+              (message) line-end)
+     (info line-start (file-name) ":" line ":" column ":"
+           "C:" (id (one-or-more (not (any ":")))) ":"
+           (message) line-end))
+    :modes python-mode)
+
+  (add-hook 'python-mode-hook
+            (function (lambda()
+                        (flycheck-select-checker 'python-pylint-custom)
+                        (flycheck-mode)))))
+
+(unless (eq system-type 'cygwin)
+    (add-hook 'python-mode-hook
+            (function (lambda()
+                        (flycheck-select-checker 'python-pylint)
+                        (flycheck-mode)))))
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; auto insert
@@ -217,18 +324,20 @@
 	 "../../../emacs-insert"
 	 "~/emacs/insert"))
 
-(setq auto-insert-alist (append 
-			 '(("\\.java$" . "Java") 
-			   ("\\.tcl$" . "Tcl") 
-			   ("\\.cpp$" . "C++") 
+(setq auto-insert-alist (append
+			 '(("\\.java$" . "Java")
+			   ("\\.tcl$" . "Tcl")
+			   ("\\.cpp$" . "C++")
 			   ("\\.p[lm]$" . "CPerl")
+			   ("\\.py$" . "Python")
 			   ("[Cc]onstruct$" . "CPerl")
-			   ("[Cc]onscript$" . "CPerl")) 
+			   ("[Cc]onscript$" . "CPerl"))
 			 auto-insert-alist))
 
-(setq auto-insert-type-alist (append 
-			      '(("Java" . "java-insert.java") 
+(setq auto-insert-type-alist (append
+			      '(("Java" . "java-insert.java")
 				("Tcl" . "tcl-insert.tcl")
+                                ("Python" . "py-insert.py")
 				("CPerl" . "pl-insert.pl"))
 			      auto-insert-type-alist))
 
@@ -253,12 +362,6 @@
 ;;;;;;;;;;;;;;;;;;;;
 
 (load-library "iv-mode")
-
-;;;;;;;;;;;;;;;;;;;;
-;; server
-;;;;;;;;;;;;;;;;;;;;
-
-(server-start)
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; ibuffer
@@ -314,7 +417,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("ac0df460b05de49aafa7a4595999cd926a250fcbc18b19a0d7923fe0b693aacd" "d347797c547ca95a11a2fa34ca1a825b5c4c80bfbb30e9b4fd34977f405fd746" "d24e10524bb50385f7631400950ba488fa45560afcadd21e6e03c2f5d0fad194" "fe6330ecf168de137bb5eddbf9faae1ec123787b5489c14fa5fa627de1d9f82b" "3dd173744ae0990dd72094caef06c0b9176b3d98f0ee5d822d6a7e487c88d548" "246a51f19b632c27d7071877ea99805d4f8131b0ff7acb8a607d4fd1c101e163" "f5e56ac232ff858afb08294fc3a519652ce8a165272e3c65165c42d6fe0262a0" default))))
+ '(custom-safe-themes
+   (quote
+    ("ac0df460b05de49aafa7a4595999cd926a250fcbc18b19a0d7923fe0b693aacd" "d347797c547ca95a11a2fa34ca1a825b5c4c80bfbb30e9b4fd34977f405fd746" "d24e10524bb50385f7631400950ba488fa45560afcadd21e6e03c2f5d0fad194" "fe6330ecf168de137bb5eddbf9faae1ec123787b5489c14fa5fa627de1d9f82b" "3dd173744ae0990dd72094caef06c0b9176b3d98f0ee5d822d6a7e487c88d548" "246a51f19b632c27d7071877ea99805d4f8131b0ff7acb8a607d4fd1c101e163" "f5e56ac232ff858afb08294fc3a519652ce8a165272e3c65165c42d6fe0262a0" default)))
+ '(directory-free-space-program nil)
+ '(indent-tabs-mode nil)
+ '(py-underscore-word-syntax-p nil))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

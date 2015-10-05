@@ -9,3 +9,4 @@ Columns=150
 Rows=50
 FontIsBold=no
 FontHeight=9
+ClickTargetMod=shift
