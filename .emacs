@@ -100,11 +100,18 @@
 
 
 ;; Frame parameters
-(setq default-frame-alist
-      (append  '((vertical-scroll-bars . t)
-		 (font . "-outline-Anonymous Pro-normal-r-normal-normal-15-97-96-96-c-*-iso10646-1")
-		 (height . 46))
-	       default-frame-alist))
+(if (eq system-type 'cygwin)
+    (setq default-frame-alist
+          (append  '((vertical-scroll-bars . t)                 
+                     (font . "-outline-Anonymous Pro-normal-r-normal-normal-15-97-96-96-c-*-iso10646-1")
+                     (height . 46))
+                   default-frame-alist))
+    (setq default-frame-alist
+          (append  '((vertical-scroll-bars . t)                 
+                     (font . "9x15")
+                     (height . 52))
+                   default-frame-alist)))
+  
 (add-hook 'after-make-frame-hook (function 
 				  (lambda(frame) 
 				    (frame-update-face-colors frame))))
