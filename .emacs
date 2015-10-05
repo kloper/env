@@ -229,7 +229,6 @@
           (function (lambda()
                       (local-set-key [tab] 'py-indent-line-outmost)
                       (local-set-key [C-tab] 'py-indent-line)
-                      (toggle-py-underscore-word-syntax-p nil)
                       (add-hook 'write-contents-functions
                                 (lambda()
                                   (save-excursion
@@ -422,7 +421,8 @@
    (quote
     ("ac0df460b05de49aafa7a4595999cd926a250fcbc18b19a0d7923fe0b693aacd" "d347797c547ca95a11a2fa34ca1a825b5c4c80bfbb30e9b4fd34977f405fd746" "d24e10524bb50385f7631400950ba488fa45560afcadd21e6e03c2f5d0fad194" "fe6330ecf168de137bb5eddbf9faae1ec123787b5489c14fa5fa627de1d9f82b" "3dd173744ae0990dd72094caef06c0b9176b3d98f0ee5d822d6a7e487c88d548" "246a51f19b632c27d7071877ea99805d4f8131b0ff7acb8a607d4fd1c101e163" "f5e56ac232ff858afb08294fc3a519652ce8a165272e3c65165c42d6fe0262a0" default)))
  '(directory-free-space-program nil)
- '(indent-tabs-mode nil))
+ '(indent-tabs-mode nil)
+ '(py-underscore-word-syntax-p nil))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
